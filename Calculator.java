@@ -1,10 +1,11 @@
 //Machine Problem 2 Group 10
 //Alfonso Gonzalez & Connor Griffith
-//9/23/2021
+//10/13/2021
 
 import java.sql.Array;
 import java.util.ArrayList;
 import java.util.List;
+import java.lang.Math;
 
 public class Calculator {
     private ArrayList<ArrayList<Float>> matrix1;
@@ -104,7 +105,7 @@ public class Calculator {
 
     public static void main(String[] args) {
         Calculator calc = new Calculator();
-
+        System.out.println();
         // Perform calculations
     }
 }
