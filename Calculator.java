@@ -5,7 +5,7 @@
 import java.sql.Array;
 import java.util.ArrayList;
 import java.util.List;
-import java.lang.Math;
+import java.util.Random;
 
 public class Calculator {
     private ArrayList<ArrayList<Float>> matrix1;
@@ -25,6 +25,23 @@ public class Calculator {
     private void generateMatrices() {
         // Populate the 20x20 matrix
         // Temporary for testing
+        
+        Random rand;
+        int randomNum = rand.nextInt(101);
+        int rows = 20;
+        int columns = 20;
+        int[][] array = new int[rows][columns];
+
+        for(int i = 0; i<rows; i++)
+            for(int j = 0; j<columns; j++)
+                array[i][j] = randomNum; //make each index a random integer between zero and 1
+        for(int i = 0; i<rows; i++)
+        {
+            for(int j = 0; j<columns; j++) {
+        System.out.print(array[i][j]);
+        }
+        System.out.println();
+        }
         for (int i = 0; i < 20; i++) {
             ArrayList<Float> row = new ArrayList<>();
             for (int j = 0; j < 20; j++) {
@@ -52,7 +69,14 @@ public class Calculator {
 
         public void run() {
             // We do the multiplication here
-            
+            // result = //not sure how to thread the first 4 rows
+            //pseudo code: (row : colunm),(i : j)
+            //1 of 5 threads each where each consecutive thread uses a+5,b+5:
+            //int a = 0;
+            //int b = 4;
+            //for z=a:b {
+            //  matrix1(:z)*matrix2(z:); //entirety of respective column/row                  
+            //}
         }
 
         // Results
