@@ -11,6 +11,8 @@ public class Calculator {
     private List<List<Integer>> matrix1;
     private List<List<Integer>> matrix2;
 
+    private List<List<Integer>> resultMatrix;
+
     private int threadCount = 5;
 
     public Calculator() {
@@ -35,9 +37,13 @@ public class Calculator {
             ArrayList<Integer> row = new ArrayList<>();
             for (int j = 0; j < columns; j++) {
                 int n = rand.nextInt(10);
-                System.out.print(n + ", ");
-
                 row.add(n);
+                
+                System.out.print(n);
+                if (j < columns - 1) {
+                    // Print until last
+                    System.out.print(", ");
+                }
             }
             
             matrix1.add(row);
@@ -53,58 +59,35 @@ public class Calculator {
             ArrayList<Integer> row = new ArrayList<>();
             for (int j = 0; j < columns; j++) {
                 int n = rand.nextInt(10);
-                System.out.print(n + ", ");
-
                 row.add(n);
+
+                System.out.print(n);
+                if (j < columns - 1) {
+                    // Print until last
+                    System.out.print(", ");
+                }
             }
 
             matrix2.add(row);
             System.out.println("");
         }
-    }
 
-    // Matrix multiplication
+        // Create our result matrix
+        resultMatrix = new ArrayList<>();
+        for (int i = 0; i < rows; i++) {
+            // Populate our row
+            ArrayList<Integer> row = new ArrayList<>();
+            for (int j = 0; j < columns; j++) {
+                row.add(-1);
+            }
 
-    private class Runner implements Runnable {
-        private Integer num;
-        private List<List<Integer>> rows;
-        private List<List<Integer>> cols;
-
-        private Integer result;
-
-        public Runner(Integer num, List<List<Integer>> rows, List<List<Integer>> cols) {
-            this.num = num;
-            this.rows = rows;
-            this.cols = cols;
-        }
-
-        // Main
-
-        public void run() {
-            System.out.println("Thread #" + num + " is beginning");
-
-            // We do the multiplication here
-            // result = //not sure how to thread the first 4 rows
-            //pseudo code: (row : colunm),(i : j)
-            //1 of 5 threads each where each consecutive thread uses a+5,b+5:
-            //int a = 0;
-            //int b = 4;
-            //for z=a:b {
-            //  matrix1(:z)*matrix2(z:); //entirety of respective column/row                  
-            //}
-
-            result = 1;
-        }
-
-        // Results
-
-        public Integer getResult() {
-            // Simply retrieve our result
-            return result;
+            resultMatrix.add(row);
         }
     }
 
-    public List<List<Integer>> colsFromSubIndicies(int bottomIndex, int topIndex) {
+    // Helper Methods
+
+    private List<List<Integer>> colsFromSubIndicies(int bottomIndex, int topIndex) {
         // Since top level arraylist is rows, and sublists contain column entries, we need to iterate through the nth entries of the rows and add those entries
         // Create our cols
         List<List<Integer>> cols = new ArrayList<>();
@@ -125,19 +108,67 @@ public class Calculator {
         return cols;
     }
 
-    public Integer matrixProduct() {
+    // Runner
+
+    private class Runner implements Runnable {
+        private Calculator calc;
+
+        private Integer num;
+        private List<List<Integer>> rows;
+        private List<List<Integer>> cols;
+
+        public Runner(Integer num, List<List<Integer>> rows, List<List<Integer>> cols, Calculator calc) {
+            this.num = num;
+            this.rows = rows;
+            this.cols = cols;
+            this.calc = calc;
+        }
+
+        // Main
+
+        public void run() {
+            System.out.println("Thread #" + num + " is beginning");
+
+            // We go through every row, and multiply by the 4 cols we have
+            for (int i = 0; i < cols.size(); i++) {
+                // Calculate our product
+                int index = (num * 4) + i;
+                List<Integer> col = cols.get(i);
+
+                for (int j = 0; j < rows.size(); j++) {
+                    Integer product = 0;
+                    List<Integer> row = rows.get(j);
+
+                    for (int k = 0; k < row.size(); k++) {
+                        product += row.get(k) * col.get(k);
+                    }
+
+                    calc.setValueOnProductMatrix(j, index, product);
+                }
+            }
+        }
+    }
+
+    // Matrix multiplication
+
+    public synchronized void setValueOnProductMatrix(int row, int col, Integer value) {
+        // Simply call to our result matrix
+        resultMatrix.get(row).set(col, value);
+    }
+
+    public void matrixProduct() {
         // We create our threads
         List<Runner> runners = new ArrayList<>();
         List<Thread> threads = new ArrayList<>();
         for (int i = 0; i < threadCount; i++) {
-            // Get subarrays
+            // Get cols
+            // Since we need all the rows in order to equally divide into 5 parts, we instead subdivide the cols
             int bottomIndex = i * 4;
             int topIndex = (i + 1) * 4;
-            List<List<Integer>> rows = matrix1.subList(bottomIndex, topIndex);
             List<List<Integer>> cols = colsFromSubIndicies(bottomIndex, topIndex);
             
             // Create our runner
-            Runner runner = new Runner(i + 1, rows, cols);
+            Runner runner = new Runner(i, matrix1, cols, this);
             runners.add(runner);
 
             Thread thread = new Thread(runner);
@@ -155,20 +186,21 @@ public class Calculator {
             }
         }
 
-        // Add up results
-        Integer result = 0;
-        for (Runner runner : runners) {
-            result += runner.getResult();
-        }
+        // At this point we're finished, lets print
+        for (List<Integer> row : resultMatrix) {
+            for (Integer product : row) {
+                System.out.print(product + ", ");
+            }
 
-        return result;
+            System.out.println("");
+        }
     }
 
     public static void main(String[] args) {
         Calculator calc = new Calculator();
 
         // Perform calculations
-        Integer product = calc.matrixProduct();
-        System.out.println("The matrix product is: " + product);
+        System.out.println("The matrix product is:");
+        calc.matrixProduct();
     }
 }
