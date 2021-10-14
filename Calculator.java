@@ -35,8 +35,7 @@ public class Calculator {
             ArrayList<Integer> row = new ArrayList<>();
             for (int j = 0; j < columns; j++) {
                 int n = rand.nextInt(10);
-                System.out.print(n);
-                System.out.print(", ");
+                System.out.print(n + ", ");
 
                 row.add(n);
             }
@@ -54,8 +53,7 @@ public class Calculator {
             ArrayList<Integer> row = new ArrayList<>();
             for (int j = 0; j < columns; j++) {
                 int n = rand.nextInt(10);
-                System.out.print(n);
-                System.out.print(", ");
+                System.out.print(n + ", ");
 
                 row.add(n);
             }
@@ -68,12 +66,14 @@ public class Calculator {
     // Matrix multiplication
 
     private class Runner implements Runnable {
+        private Integer num;
         private List<List<Integer>> rows;
         private List<List<Integer>> cols;
 
         private Integer result;
 
-        public Runner(List<List<Integer>> rows, List<List<Integer>> cols) {
+        public Runner(Integer num, List<List<Integer>> rows, List<List<Integer>> cols) {
+            this.num = num;
             this.rows = rows;
             this.cols = cols;
         }
@@ -81,6 +81,8 @@ public class Calculator {
         // Main
 
         public void run() {
+            System.out.println("Thread #" + num + " is beginning");
+
             // We do the multiplication here
             // result = //not sure how to thread the first 4 rows
             //pseudo code: (row : colunm),(i : j)
@@ -91,7 +93,6 @@ public class Calculator {
             //  matrix1(:z)*matrix2(z:); //entirety of respective column/row                  
             //}
 
-            System.out.println("Running!");
             result = 1;
         }
 
@@ -136,7 +137,7 @@ public class Calculator {
             List<List<Integer>> cols = colsFromSubIndicies(bottomIndex, topIndex);
             
             // Create our runner
-            Runner runner = new Runner(rows, cols);
+            Runner runner = new Runner(i + 1, rows, cols);
             runners.add(runner);
 
             Thread thread = new Thread(runner);
