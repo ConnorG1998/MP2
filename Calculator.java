@@ -46,7 +46,7 @@ public class Calculator {
         }
         
         // Create matrix 2
-        System.out.println("Creating Matrix 1");
+        System.out.println("Creating Matrix 2");
         
         matrix2 = new ArrayList<>();
         for (int i = 0; i < rows; i++) {
@@ -90,6 +90,9 @@ public class Calculator {
             //for z=a:b {
             //  matrix1(:z)*matrix2(z:); //entirety of respective column/row                  
             //}
+
+            System.out.println("Running!");
+            result = 1;
         }
 
         // Results
@@ -123,6 +126,7 @@ public class Calculator {
 
     public Integer matrixProduct() {
         // We create our threads
+        List<Runner> runners = new ArrayList<>();
         List<Thread> threads = new ArrayList<>();
         for (int i = 0; i < threadCount; i++) {
             // Get subarrays
@@ -131,18 +135,39 @@ public class Calculator {
             List<List<Integer>> rows = matrix1.subList(bottomIndex, topIndex);
             List<List<Integer>> cols = colsFromSubIndicies(bottomIndex, topIndex);
             
-            // Create our thread from a portion of the matricies
+            // Create our runner
             Runner runner = new Runner(rows, cols);
+            runners.add(runner);
+
             Thread thread = new Thread(runner);
+            threads.add(thread);
+            thread.start();
         }
 
-        // Temporary to get compiling
-        return 0;
+        // We wait for all of them
+        for (Thread thread : threads) {
+            try {
+                thread.join();
+            } catch (Exception e) {
+                // If error, simply sysout
+                System.out.println("Error: " + e.getMessage());
+            }
+        }
+
+        // Add up results
+        Integer result = 0;
+        for (Runner runner : runners) {
+            result += runner.getResult();
+        }
+
+        return result;
     }
 
     public static void main(String[] args) {
         Calculator calc = new Calculator();
 
         // Perform calculations
+        Integer product = calc.matrixProduct();
+        System.out.println("The matrix product is: " + product);
     }
 }
